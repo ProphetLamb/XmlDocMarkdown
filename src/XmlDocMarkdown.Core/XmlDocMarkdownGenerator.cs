@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Xml.Linq;
 
 namespace XmlDocMarkdown.Core
@@ -55,6 +56,7 @@ namespace XmlDocMarkdown.Core
 				ExternalDocs = settings.ExternalDocs,
 				NamespacePages = settings.NamespacePages,
 				FrontMatter = settings.FrontMatter,
+				SourceSymbols = ReadSourceSymbols(settings.SourceSymbols),
 			};
 			if (settings.NewLine != null)
 				generator.NewLine = settings.NewLine;
@@ -209,6 +211,24 @@ namespace XmlDocMarkdown.Core
 					foreach (var name in FindNamesMatchingPattern(subdirectoryInfo, parts[1], requiredSubstring))
 						yield return subdirectoryInfo.Name + '/' + name;
 				}
+			}
+		}
+
+		private static IReadOnlyList<SourceSymbol>? ReadSourceSymbols(string? filepath)
+		{
+			if (string.IsNullOrEmpty(filepath))
+			{
+				return null;
+			}
+			try
+			{
+				using FileStream fs = File.OpenRead(filepath);
+				return JsonSerializer.Deserialize<List<SourceSymbol>>(fs)?.AsReadOnly();
+			}
+			catch (IOException ex)
+			{
+				Console.WriteLine($"Could deserialize file `{filepath}`. {ex}");
+				return null;
 			}
 		}
 	}

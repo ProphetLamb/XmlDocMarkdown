@@ -32,6 +32,8 @@ namespace XmlDocMarkdown.Core
 
 		public IReadOnlyList<ExternalDocumentation>? ExternalDocs { get; set; }
 
+		public IReadOnlyList<SourceSymbol>? SourceSymbols { get; set; }
+
 		public IReadOnlyList<NamedText> GenerateOutput(Assembly assembly, XmlDocAssembly xmlDocAssembly) =>
 			DoGenerateOutput(assembly, xmlDocAssembly).ToList();
 
@@ -583,18 +585,7 @@ namespace XmlDocMarkdown.Core
 						writer.WriteLine("* " + $"namespace\u00A0[{GetNamespaceName(declaringType ?? typeInfo!)}](../{(typeInfo != null ? "" : "../")}{GetAssemblyUriName((declaringType ?? typeInfo!).Assembly)}{extension})");
 					}
 
-					if (typeInfo != null && declaringType == null && !string.IsNullOrEmpty(context.SourceCodePath) && !string.IsNullOrEmpty(context.RootNamespace))
-					{
-						var namespaceName = GetNamespaceName(typeInfo);
-						if (namespaceName.StartsWith(context.RootNamespace, StringComparison.Ordinal))
-						{
-							var directoryPath = context.SourceCodePath + namespaceName.Substring(context.RootNamespace.Length).Replace('.', '/');
-							if (!Uri.TryCreate(directoryPath, UriKind.Absolute, out _))
-								directoryPath = "../" + directoryPath;
-							var fileName = GetShortName(typeInfo) + ".cs";
-							writer.WriteLine($"* [{fileName}]({directoryPath}/{fileName})");
-						}
-					}
+					WriteSourceLink(context, typeInfo, declaringType, writer);
 
 					if (memberIndex < memberGroup.Count - 1)
 					{
@@ -606,6 +597,56 @@ namespace XmlDocMarkdown.Core
 				writer.WriteLine();
 				writer.WriteLine(GetCodeGenComment(context.AssemblyFileName));
 			});
+		}
+
+		private void WriteSourceLink(MarkdownContext context, TypeInfo? typeInfo, TypeInfo? declaringType, MarkdownWriter writer)
+		{
+			if (typeInfo is null)
+			{
+				return;
+			}
+			var fileName = GetShortName(typeInfo) + ".cs";
+			if (TryGetSymbol(typeInfo, out var symbol))
+			{
+				// If SourceCodePath is undefined, fallback to the raw link!
+				var uri = string.IsNullOrEmpty(context.SourceCodePath)
+					? symbol.link
+					: context.SourceCodePath + symbol.path;
+				writer.WriteLine($"* [{fileName}]({uri})");
+				return;
+			}
+
+			if (declaringType == null && !string.IsNullOrEmpty(context.SourceCodePath) && !string.IsNullOrEmpty(context.RootNamespace))
+			{
+				var namespaceName = GetNamespaceName(typeInfo);
+				if (namespaceName.StartsWith(context.RootNamespace, StringComparison.Ordinal))
+				{
+					var directoryPath = context.SourceCodePath + namespaceName.Substring(context.RootNamespace.Length).Replace('.', '/');
+					if (!Uri.TryCreate(directoryPath, UriKind.Absolute, out _))
+						directoryPath = "../" + directoryPath;
+
+					writer.WriteLine($"* [{fileName}]({directoryPath}/{fileName})");
+				}
+			}
+		}
+
+		private bool TryGetSymbol(TypeInfo? type, out SourceSymbol symbol)
+		{
+			var name = type?.FullName;
+			if (!string.IsNullOrEmpty(name) && SourceSymbols is not null && SourceSymbols.Count > 0)
+			{
+				foreach (var s in SourceSymbols)
+				{
+					if (name!.Equals(s.type, StringComparison.OrdinalIgnoreCase))
+					{
+						symbol = s;
+						return true;
+					}
+				}
+			}
+
+			symbol = default;
+			return false;
 		}
 
 		private ExternalDocumentation? FindExternalDocumentation(MemberInfo? memberInfo)

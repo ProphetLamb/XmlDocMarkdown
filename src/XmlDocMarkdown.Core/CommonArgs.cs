@@ -46,6 +46,8 @@ namespace XmlDocMarkdown.Core
 
 		public static string? ReadTocPrefix(this ArgsReader args) => args.ReadOption("toc-prefix");
 
+		public static string? ReadSourceSymbolsFile(this ArgsReader args) => args.ReadOption("symbols");
+
 		public static string? ReadNewLineOption(this ArgsReader args)
 		{
 			var value = args.ReadOption("newline");

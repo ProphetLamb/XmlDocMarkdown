@@ -44,6 +44,7 @@ namespace XmlDocMarkdown.Core
 					GenerateToc = argsReader.ReadTocFlag(),
 					TocPrefix = argsReader.ReadTocPrefix(),
 					NamespacePages = argsReader.ReadNamespacePagesFlag(),
+					SourceSymbols = argsReader.ReadSourceSymbolsFile(),
 				};
 
 				var externalDocs = new List<ExternalDocumentation>();
