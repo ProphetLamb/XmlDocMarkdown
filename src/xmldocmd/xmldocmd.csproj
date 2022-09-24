@@ -7,7 +7,7 @@
     <PackageTags>.NET XML documentation comments Markdown</PackageTags>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
-    <AssemblyName>xmldocmd</AssemblyName>
+    <AssemblyName>XmlDocMdSymbols</AssemblyName>
     <RootNamespace>XmlDocMarkdown</RootNamespace>
     <RollForward>Major</RollForward>
   </PropertyGroup>
