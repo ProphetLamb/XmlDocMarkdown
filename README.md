@@ -184,6 +184,7 @@ dotnet tool install --global XmlDocMdSymbols --version 2.9.0 # this is my fork
 
 # The input is a pdb and executable in **portable** format, not windows format :stare: : `test.pdb` and `test.dll`m
 # and the associated xml documentation file `test.xml`
+dotnet build /somewhere/test.csproj -f:net60 -c:Release -o:.
 
 # The pdb is unnecessary, if the metadata is present in the executable, in this case replace `test.pdb` with `test.dll`.
 # The original source code is not necessary, extract will generate the sourcetree in `src/` and extract the metadata to `meta.json`
