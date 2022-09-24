@@ -611,7 +611,7 @@ namespace XmlDocMarkdown.Core
 				// If SourceCodePath is undefined, fallback to the raw link!
 				var uri = string.IsNullOrEmpty(context.SourceCodePath)
 					? symbol.link
-					: context.SourceCodePath + symbol.path;
+					: UriCombine(context.SourceCodePath!, symbol.path);
 				var filename = Path.GetFileName(symbol.path);
 				writer.WriteLine($"* [{filename}]({uri})");
 				hasSymbol = true;
@@ -636,6 +636,17 @@ namespace XmlDocMarkdown.Core
 					writer.WriteLine($"* [{fileName}]({directoryPath}/{fileName})");
 				}
 			}
+		}
+
+		private static string UriCombine(string lhs, string rhs)
+		{
+			return string.IsNullOrEmpty(lhs) ? rhs : string.IsNullOrEmpty(rhs) ? lhs : (lhs[lhs.Length - 1], rhs[0]) switch
+			{
+				('/' or '\\', '/' or '\\') => $"{lhs.Substring(0, lhs.Length - 1)}/{rhs.Substring(1)}",
+				('/' or '\\', _) => $"{lhs.Substring(0, lhs.Length - 1)}/{rhs}",
+				(_, '/' or '\\') => $"{lhs}/{rhs.Substring(1)}",
+				(_, _) => $"{lhs}/{rhs}",
+			};
 		}
 
 		private IEnumerable<SourceSymbol> GetSymbols(TypeInfo? type)
