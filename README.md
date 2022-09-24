@@ -8,7 +8,7 @@ This is a fork of [ejball/XmlDocMarkdown](https://github.com/ejball/XmlDocMarkdo
 
 ## Fork
 
-This is fork implement support for source symbols mappings, in order to determine source file locations. [Steve Gilham](https://github.com/SteveGilham/XmlDocMarkdown/tree/develop/issue-81)s fork implements a similar solution to this problem, but the appoach taken fails when there is no methodbody in a type (e.g. interfaces, markers or abstract classes). Which is the case for a [Surreal.Net](https://github.com/ProphetLamb/Surreal.Net) the issue results in nonsensical code references:
+This fork implements support for source symbols mappings, in order to determine source file locations. [Steve Gilham](https://github.com/SteveGilham/XmlDocMarkdown/tree/develop/issue-81)s fork implements a similar solution to this problem, but the appoach taken fails when there is no methodbody in a type (e.g. interfaces, markers or abstract classes). Which is the case for a [Surreal.Net](https://github.com/ProphetLamb/Surreal.Net) the issue results in nonsensical code references:
 
 ![The bug](./docs/assets/bug.png)
 
