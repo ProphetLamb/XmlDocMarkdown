@@ -605,19 +605,27 @@ namespace XmlDocMarkdown.Core
 			{
 				return;
 			}
-			var fileName = GetShortName(typeInfo) + ".cs";
-			if (TryGetSymbol(typeInfo, out var symbol))
+			bool hasSymbol = false;
+			foreach (SourceSymbol symbol in GetSymbols(typeInfo))
 			{
 				// If SourceCodePath is undefined, fallback to the raw link!
 				var uri = string.IsNullOrEmpty(context.SourceCodePath)
 					? symbol.link
 					: context.SourceCodePath + symbol.path;
-				writer.WriteLine($"* [{fileName}]({uri})");
+				var filename = Path.GetFileName(symbol.path);
+				writer.WriteLine($"* [{filename}]({uri})");
+				hasSymbol = true;
+			}
+
+			// Fallback to default behaviour, only if no symbol was found!
+			if (hasSymbol)
+			{
 				return;
 			}
 
 			if (declaringType == null && !string.IsNullOrEmpty(context.SourceCodePath) && !string.IsNullOrEmpty(context.RootNamespace))
 			{
+				var fileName = GetShortName(typeInfo) + ".cs";
 				var namespaceName = GetNamespaceName(typeInfo);
 				if (namespaceName.StartsWith(context.RootNamespace, StringComparison.Ordinal))
 				{
@@ -630,7 +638,7 @@ namespace XmlDocMarkdown.Core
 			}
 		}
 
-		private bool TryGetSymbol(TypeInfo? type, out SourceSymbol symbol)
+		private IEnumerable<SourceSymbol> GetSymbols(TypeInfo? type)
 		{
 			var name = type?.FullName;
 			if (!string.IsNullOrEmpty(name) && SourceSymbols is not null && SourceSymbols.Count > 0)
@@ -639,14 +647,10 @@ namespace XmlDocMarkdown.Core
 				{
 					if (name!.Equals(s.type, StringComparison.OrdinalIgnoreCase))
 					{
-						symbol = s;
-						return true;
+						yield return s;
 					}
 				}
 			}
-
-			symbol = default;
-			return false;
 		}
 
 		private ExternalDocumentation? FindExternalDocumentation(MemberInfo? memberInfo)
